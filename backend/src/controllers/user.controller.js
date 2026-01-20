@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudniary.js";
 
+// Register User
 export const registerUser = asyncHandler(async (req, res) => {
     const { firstName, lastName, email, username, password } = req.body;
 
@@ -52,4 +53,23 @@ export const registerUser = asyncHandler(async (req, res) => {
     res.status(200).json(
         new ApiResponse(200, createdUser, "Registeration successfully.")
     );
+});
+
+// login User
+export const loginUser = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+
+    const userExist = await User.findOne({ email });
+
+    if (!userExist) {
+        throw new ApiError(402, "Invalid User");
+    }
+
+    const matchPassword = await userExist.isCorrectPassword(password);
+
+    if (!matchPassword) {
+        throw new ApiError(402, "Invalid Cridential");
+    }
+
+    res.status(200).json(userExist, "Login Successfully.");
 });
